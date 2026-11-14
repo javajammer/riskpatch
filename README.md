@@ -2,7 +2,7 @@
 
 **Identify. Prioritize. Remediate.**
 
-Vulnerability & Patch Management Platform. Repository: `github.com/yourorganization/riskpatch` (replace the placeholder with your organisation's path).
+Vulnerability & Patch Management Platform.
 
 RiskPatch was previously called Stackwatch. The command, image, package and collector names changed; see the rename notes in CHANGELOG.md for what existing servers must update.
 
