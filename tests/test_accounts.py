@@ -85,6 +85,7 @@ def test_password_change_keeps_current_session_and_signs_out_others(env):
     assert auth.authenticate_session(conn, other) is None
 
 
+@pytest.mark.req("REQ-SEC-011")
 def test_admin_cannot_disable_self_and_reset_signs_out_target(env):
     client, conn, _ = env
     session_for(client, conn, "admin")
@@ -96,7 +97,6 @@ def test_admin_cannot_disable_self_and_reset_signs_out_target(env):
     client.post(f"/ui/actions/users/{target}/password", data={"csrf": csrf(client), "new_password": "replacement password 2"}, follow_redirects=False)
     assert auth.authenticate_session(conn, target_session) is None
     assert auth.authenticate_password(conn, "dave", "replacement password 2") is not None
-
 
 def test_disabled_user_cannot_sign_in_and_loses_active_sessions(env):
     client, conn, _ = env

@@ -27,3 +27,5 @@ collector/bin/
 .DS_Store
 *.tmp
 
+.kilo
+.tgrep
