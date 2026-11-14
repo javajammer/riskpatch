@@ -2,21 +2,10 @@
 
 **Identify. Prioritize. Remediate.**
 
-Vulnerability & Patch Management Platform.
+RiskPatch is a Vulnerability & Patch Management Platform. Docker-based CVE intelligence platform that monitors declared technology stacks in real-time. Automatically fetches CVE data, evaluates component vulnerabilities against runtime context (exposure, authentication, mitigations), and generates prioritized security reports. 
 
 RiskPatch was previously called Stackwatch. The command, image, package and collector names changed; see the rename notes in CHANGELOG.md for what existing servers must update.
 
-> **Notes for the repository owner (delete this section before publishing)**
->
-> **Sanitized and replaced with placeholders:** `<TOKEN>`, `<PASSWORD>`, `<SERVER_IP>`, `<LAN_IP>`, `<HOME>`, `<EMAIL>`, `<GITHUB_TOKEN>`. The full list and how to fill each one are in `SANITIZED.md`.
->
-> **Before publishing:**
-> - Replace `github.com/yourorganization/riskpatch` on line 5 with your real repository path.
-> - Add a `LICENSE` file. The repository has no license yet, so others have no right to use or modify it.
-> - Do not push this folder to the old remote (`thecvewatch`). Its Git history still contains a `sw_…` token and a GitHub PAT. Create a new repository instead.
-> - Revoke the leaked `bootstrap-admin` token and the GitHub PAT that was exposed in the old repository, even though this new one is clean.
-> - Scan for secrets before the first commit, for example with `gitleaks detect --source .`.
->
 > **First-time setup:**
 > - `.env`: copy from `.env.example`. Set `RISKPATCH_BOOTSTRAP_ADMIN_USER` and `RISKPATCH_BOOTSTRAP_ADMIN_PASSWORD` (at least 12 characters).
 > - `certs/`: create with `./scripts/generate-ssl.sh <SERVER_IP>`. This folder is not included.
@@ -30,8 +19,6 @@ RiskPatch was previously called Stackwatch. The command, image, package and coll
 > - `<LAN_IP>` and `<SERVER_IP>` in scripts and documents are examples only. Make sure all of them are replaced before use.
 >
 > **Deliberately not included:** `.git`, `.env`, databases, `cache/`, `results/`, `reports/`, session transcripts, CVE output, `certs/`, `.venv/`, and screenshots. The full list is in `SANITIZED.md`.
-
-A Docker-based CVE intelligence platform that monitors declared technology stacks in real-time. Automatically fetches CVE data, evaluates component vulnerabilities against runtime context (exposure, authentication, mitigations), and generates prioritized security reports.
 
 **Key Features:**
 - Declarative inventory (YAML-based tech stack definition)
