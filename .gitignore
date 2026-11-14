@@ -1,0 +1,29 @@
+# Python
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.egg-info/
+dist/
+
+# Project
+inventory/stack.yaml
+cache/
+reports/
+cookies.txt
+*.db
+*.sqlite3
+
+# SSL (only ignore private key, cert.pem is public)
+certs/key.pem
+
+# Collector binary (compile locally)
+collector/bin/
+
+# Docker
+
+# Temp
+.DS_Store
+*.tmp
+

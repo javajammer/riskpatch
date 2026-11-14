@@ -1,0 +1,33 @@
+meta:
+  name: example-php
+  environment: production
+components:
+  - id: php
+    name: PHP
+    version: "8.2.12"
+    ecosystem: generic
+    vendor: php
+    product: php
+    cpe: "cpe:2.3:a:php:php:8.2.12:*:*:*:*:*:*:*"
+    role: runtime
+    exposure: internet
+    auth_boundary: unauthenticated
+    used_at_runtime: true
+    mitigations: []
+    distro_package: ""
+    notes: "Fill in upstream version. If distro package, fill distro_package."
+  - id: nginx
+    name: nginx
+    version: "1.24.0"
+    ecosystem: generic
+    vendor: f5
+    product: nginx
+    cpe: "cpe:2.3:a:f5:nginx:1.24.0:*:*:*:*:*:*:*"
+    role: webserver
+    exposure: internet
+    auth_boundary: unauthenticated
+    used_at_runtime: true
+    mitigations:
+      - reverse proxy
+    distro_package: ""
+    notes: ""

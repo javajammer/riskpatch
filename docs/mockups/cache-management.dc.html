@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>StackWatch – Cache management</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+body{margin:0;background:#070e1c;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#e6edf7}
+*{box-sizing:border-box}
+.card{background:#0e1a30;border:1px solid #1c2b47;border-radius:16px;padding:24px}
+.lbl{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#93a4bf;font-weight:500}
+.mut{color:#93a4bf}
+.big{font-size:44px;font-weight:700;line-height:1;letter-spacing:-.01em}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.nav a{display:block;padding:14px 20px;border-radius:12px;color:#c4d0e4;text-decoration:none;font-size:17px}
+.nav a:hover{background:#0f1d36}
+.nav a.on{background:#17315a;color:#2dd4bf;font-weight:600}
+.tab{font:inherit;font-size:16px;font-weight:600;color:#93a4bf;background:transparent;border:1px solid transparent;border-radius:10px;padding:10px 22px;min-height:44px;cursor:pointer}
+.tab.on{background:#17315a;color:#e6edf7;border-color:#2dd4bf}
+.btn{font:inherit;font-size:15px;font-weight:600;border-radius:10px;padding:10px 20px;min-height:44px;cursor:pointer}
+.btn.pri{background:#3b82f6;border:1px solid #3b82f6;color:#04122b}
+.btn.sec{background:transparent;border:1px solid #2a3d62;color:#e6edf7}
+table.t{width:100%;border-collapse:collapse;min-width:820px}
+.t th{text-align:left;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#93a4bf;font-weight:500;padding:12px 14px;border-bottom:1px solid #1c2b47;background:#0b1527}
+.t td{padding:14px;border-bottom:1px solid #16243d;font-size:15px;vertical-align:middle}
+.t tr:last-child td{border-bottom:0}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px}
+.track{height:8px;border-radius:6px;background:#1a2a48;overflow:hidden}
+.track b{display:block;height:100%;border-radius:6px}
+.scroll{overflow-x:auto;border:1px solid #1c2b47;border-radius:12px}
+.kpi{flex:1 1 260px;min-width:0;background:#0e1a30;border:1px solid #1c2b47;border-radius:16px;padding:24px 26px;border-left-width:4px}
+h2.sec{margin:0;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:#e6edf7;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:24px}
+.layer{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;padding:18px 0;border-top:1px solid #16243d}
+.tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #2a3d62;border-radius:6px;padding:3px 8px;color:#93a4bf;white-space:nowrap}
+</style>
+</helmet>
+
+<div style="display:flex;flex-wrap:wrap;min-height:100vh;background:#070e1c">
+
+  <!-- SIDEBAR -->
+  <aside style="flex:0 0 280px;max-width:100%;background:#0a1324;border-right:1px solid #1c2b47;padding:36px 24px;display:flex;flex-direction:column;gap:28px">
+    <div>
+      <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:26px;font-weight:600;letter-spacing:.14em;color:#e6edf7">STACK<span style="color:#2dd4bf">WATCH</span></div>
+      <div class="lbl" style="font-size:11px;margin-top:10px">SOC · Vulnerability Intel</div>
+    </div>
+    <nav class="nav" style="display:flex;flex-direction:column;gap:6px">
+      <a href="#main">Overview</a>
+      <a href="#main">Assets</a>
+      <a href="#main">Findings</a>
+      <a href="#main">Alerts</a>
+      <a href="#main">Reports</a>
+      <a href="#main">Jobs</a>
+      <a href="#main" class="on" aria-current="page">Cache</a>
+      <a href="#main">CVE Intel</a>
+      <a href="#main">AI Correlation</a>
+      <a href="#main">AI Skills</a>
+      <a href="#main">Status</a>
+      <a href="#main">System</a>
+    </nav>
+    <div style="margin-top:auto;border-top:1px solid #1c2b47;padding-top:20px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-weight:600">guest</div>
+      <button class="btn sec" style="align-self:flex-start">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <main id="main" style="flex:999 1 560px;min-width:0;padding:44px 48px 64px;display:flex;flex-direction:column;gap:28px">
+
+    <header style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px">
+      <div>
+        <h1 style="margin:0;font-size:40px;font-weight:700;letter-spacing:-.01em">Cache management</h1>
+        <p class="mut" style="margin:10px 0 0;font-size:18px">Freshness, progress, and integrity of every cached layer</p>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+        <button class="btn sec">Invalidate stale</button>
+        <button class="btn pri">Refresh all</button>
+      </div>
+    </header>
+
+    <div style="display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;border:1px dashed #2a3d62;border-radius:12px;padding:12px 18px">
+      <span class="tag" style="color:#fbbf24;border-color:#fbbf24">Mockup</span>
+      <span class="mut" style="font-size:14px;line-height:1.5;flex:1 1 420px">Asset count, findings, KEV, catalog size, and snapshot age come from the current StackWatch overview (snapshot Nov 03, 12:20 UTC). TTLs, job timings, and run history are illustrative targets.</span>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px">
+      <div role="group" aria-label="View" style="display:flex;gap:6px;background:#0b1527;border:1px solid #1c2b47;border-radius:12px;padding:5px">
+        <button class="{{execCls}}" onClick="{{setExec}}">Executive summary</button>
+        <button class="{{techCls}}" onClick="{{setTech}}">Technical detail</button>
+      </div>
+      <div class="mut" style="font-size:15px">Latest snapshot: Nov 03, 12:20 UTC · <span style="color:#fbbf24;font-weight:600">5d ago · stale</span></div>
+    </div>
+
+    <!-- KPI ROW (both views) -->
+    <section style="display:flex;flex-wrap:wrap;gap:24px">
+      <div class="kpi" style="border-left-color:#fbbf24">
+        <div class="lbl">Cache health</div>
+        <div class="big" style="margin-top:16px;color:#fbbf24">Degraded</div>
+        <div class="mut" style="margin-top:14px;font-size:16px">2 of 4 layers within TTL</div>
+      </div>
+      <div class="kpi" style="border-left-color:#f87171">
+        <div class="lbl">Oldest cached data</div>
+        <div class="big" style="margin-top:16px;color:#f87171">5d</div>
+        <div class="mut" style="margin-top:14px;font-size:16px">Inventory snapshot · target 24h</div>
+      </div>
+      <div class="kpi" style="border-left-color:#4f9cf9">
+        <div class="lbl">Assets reporting</div>
+        <div class="big" style="margin-top:16px;color:#60a5fa">0 / 1</div>
+        <div class="mut" style="margin-top:14px;font-size:16px">Reporting in the last 24h</div>
+      </div>
+      <div class="kpi" style="border-left-color:#fb923c">
+        <div class="lbl">Findings on stale data</div>
+        <div class="big" style="margin-top:16px;color:#fb923c">203</div>
+        <div class="mut" style="margin-top:14px;font-size:16px">Correlated against a 5d-old snapshot</div>
+      </div>
+    </section>
+
+    <!-- CACHE LAYERS (both views) -->
+    <section class="card">
+      <h2 class="sec">Cache layers</h2>
+      <p class="mut" style="margin:10px 0 14px;font-size:16px">Each layer has an explicit state, a refresh time, and a TTL. A bar that fills past its TTL means the layer is stale.</p>
+      <sc-for list="{{layers}}" as="l" hint-placeholder-count="4">
+        <div class="layer">
+          <div style="flex:1 1 240px;min-width:0">
+            <div style="font-size:18px;font-weight:600">{{l.name}}</div>
+            <div class="mut" style="font-size:14px;margin-top:4px">{{l.detail}}</div>
+          </div>
+          <div style="flex:0 0 120px"><span class="pill" style="color:{{l.c}};border-color:{{l.c}}"><i style="background:{{l.c}}"></i>{{l.stateLabel}}</span></div>
+          <div style="flex:1 1 220px;min-width:0">
+            <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:8px"><span class="mut">{{l.refreshed}}</span><span style="color:{{l.c}};font-weight:600">{{l.ageLabel}}</span></div>
+            <div class="track" role="img" aria-label="{{l.aria}}"><b style="width:{{l.pct}};background:{{l.c}}"></b></div>
+          </div>
+        </div>
+      </sc-for>
+    </section>
+
+    <!-- EXECUTIVE VIEW -->
+    <sc-if value="{{isExec}}" hint-placeholder-val="{{ true }}">
+      <section class="row">
+        <div class="card" style="flex:1 1 420px;min-width:0">
+          <h2 class="sec">State distribution</h2>
+          <p class="mut" style="margin:10px 0 20px;font-size:16px">Every cache entry is in exactly one state.</p>
+          <div style="display:flex;height:14px;border-radius:8px;overflow:hidden;background:#1a2a48" role="img" aria-label="Cache entries: 2 success, 2 stale">
+            <sc-for list="{{segs}}" as="s" hint-placeholder-count="2">
+              <div style="flex:{{s.n}} 1 0;background:{{s.c}}"></div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:14px 28px;margin-top:22px">
+            <sc-for list="{{states}}" as="s" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="width:10px;height:10px;border-radius:50%;background:{{s.c}};display:inline-block"></span>
+                <span style="font-size:15px">{{s.label}}</span>
+                <span style="font-size:20px;font-weight:700;color:{{s.c}}">{{s.n}}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div class="mut" style="margin-top:22px;font-size:14px;line-height:1.55">Lifecycle: pending → running → success → stale → (refresh). A failed run moves the entry to failed after retries are exhausted.</div>
+        </div>
+
+        <div class="card" style="flex:1 1 420px;min-width:0">
+          <h2 class="sec">Risk of leaving it as is</h2>
+          <p class="mut" style="margin:10px 0 6px;font-size:16px">What a 5-day-old cache means for today’s numbers.</p>
+          <sc-for list="{{risks}}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;gap:18px;align-items:baseline;padding:16px 0;border-top:1px solid #16243d">
+              <div style="flex:0 0 64px;font-size:30px;font-weight:700;color:{{r.c}}">{{r.n}}</div>
+              <div style="font-size:16px;line-height:1.5">{{r.text}}</div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="sec">Freshness targets</h2>
+        <p class="mut" style="margin:10px 0 20px;font-size:16px">How long each layer may go without a refresh, what refreshes it, and what marks it stale. Values come from configuration.</p>
+        <div class="scroll">
+          <table class="t" style="min-width:900px">
+            <thead><tr><th>Layer</th><th>Freshness target</th><th>Refreshed by</th><th>Marked stale when</th></tr></thead>
+            <tbody>
+              <sc-for list="{{compare}}" as="c" hint-placeholder-count="4">
+                <tr>
+                  <td style="font-weight:600">{{c.layer}}</td>
+                  <td class="mono">{{c.ttl}}</td>
+                  <td class="mut">{{c.by}}</td>
+                  <td class="mut">{{c.stale}}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </sc-if>
+
+    <!-- TECHNICAL VIEW -->
+    <sc-if value="{{isTech}}" hint-placeholder-val="{{ false }}">
+      <section class="card">
+        <h2 class="sec">Refresh jobs</h2>
+        <p class="mut" style="margin:10px 0 20px;font-size:16px">Recent runs per layer, with progress, duration, and retry budget.</p>
+        <div class="scroll">
+          <table class="t">
+            <thead><tr><th>Job</th><th>Layer</th><th>Target</th><th>State</th><th>Progress</th><th>Started (UTC)</th><th>Duration</th><th>Retries</th></tr></thead>
+            <tbody>
+              <sc-for list="{{jobs}}" as="j" hint-placeholder-count="6">
+                <tr>
+                  <td class="mono">{{j.id}}</td>
+                  <td>{{j.layer}}</td>
+                  <td class="mut">{{j.target}}</td>
+                  <td><span class="pill" style="color:{{j.c}};border-color:{{j.c}}"><i style="background:{{j.c}}"></i>{{j.stateLabel}}</span></td>
+                  <td style="min-width:130px"><div style="display:flex;align-items:center;gap:10px"><div class="track" style="flex:1"><b style="width:{{j.pct}};background:{{j.c}}"></b></div><span class="mono">{{j.pct}}</span></div></td>
+                  <td class="mono">{{j.started}}</td>
+                  <td class="mono">{{j.duration}}</td>
+                  <td class="mono">{{j.retries}}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="row">
+        <div class="card" style="flex:1 1 520px;min-width:0">
+          <h2 class="sec">Invalidation triggers</h2>
+          <p class="mut" style="margin:10px 0 20px;font-size:16px">What makes a cache entry stale, and whether anything acts on it today.</p>
+          <div class="scroll">
+            <table class="t" style="min-width:560px">
+              <thead><tr><th>Trigger</th><th>Scope</th><th>Status</th></tr></thead>
+              <tbody>
+                <sc-for list="{{triggers}}" as="t" hint-placeholder-count="5">
+                  <tr>
+                    <td style="font-weight:600">{{t.name}}</td>
+                    <td class="mut">{{t.scope}}</td>
+                    <td><span class="pill" style="color:{{t.c}};border-color:{{t.c}}"><i style="background:{{t.c}}"></i>{{t.status}}</span></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="flex:1 1 420px;min-width:0">
+          <h2 class="sec">Gaps and next steps</h2>
+          <p class="mut" style="margin:10px 0 6px;font-size:16px">Ordered by how much each one reduces stale-data risk.</p>
+          <sc-for list="{{gaps}}" as="g" hint-placeholder-count="5">
+            <div style="display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-top:1px solid #16243d">
+              <span class="tag" style="color:{{g.c}};border-color:{{g.c}}">{{g.p}}</span>
+              <div>
+                <div style="font-size:16px;font-weight:600">{{g.title}}</div>
+                <div class="mut" style="font-size:14px;margin-top:4px;line-height:1.5">{{g.note}}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+  </main>
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'exec' };
+  }
+  renderVals() {
+    const tab = this.state.tab;
+    const S = {
+      success: { label: 'Success', c: '#34d399' },
+      running: { label: 'Running', c: '#60a5fa' },
+      stale:   { label: 'Stale',   c: '#fbbf24' },
+      failed:  { label: 'Failed',  c: '#f87171' },
+      pending: { label: 'Pending', c: '#a3b1c6' }
+    };
+    const st = (k) => ({ stateLabel: S[k].label, c: S[k].c });
+
+    const layers = [
+      { name: 'Threat intel feeds', detail: 'NVD · CVE.org · CISA KEV · SentinelOne', refreshed: 'Synced 2h ago · TTL 6h', ageLabel: '2h / 6h', pct: '33%', aria: 'Age 2 hours of 6 hour TTL', ...st('success') },
+      { name: 'CVE catalog index', detail: '14,471 indexed records', refreshed: 'Indexed 2h ago · TTL 6h', ageLabel: '2h / 6h', pct: '33%', aria: 'Age 2 hours of 6 hour TTL', ...st('success') },
+      { name: 'Asset inventory snapshot', detail: '1 asset · example-asset', refreshed: 'Collected Nov 03, 12:20 UTC · TTL 24h', ageLabel: '5d / 24h', pct: '100%', aria: 'Age 5 days against 24 hour TTL, over limit', ...st('stale') },
+      { name: 'Correlation results', detail: '203 open findings · 51 unverified · 3 KEV', refreshed: 'Computed from the Nov 03 snapshot', ageLabel: 'Depends on inventory', pct: '100%', aria: 'Stale because its inventory input is stale', ...st('stale') }
+    ];
+
+    const counts = { success: 2, running: 0, stale: 2, pending: 0, failed: 0 };
+    const order = ['success', 'running', 'stale', 'pending', 'failed'];
+    const states = order.map((k) => ({ label: S[k].label, c: S[k].c, n: counts[k] }));
+    const segs = states.filter((s) => s.n > 0);
+
+    const risks = [
+      { n: '203', c: '#fb923c', text: 'open findings were correlated against an inventory that is 5 days old, so new or removed packages are not reflected.' },
+      { n: '3', c: '#fbbf24', text: 'known-exploited (KEV) findings cannot be confirmed as still present or already fixed.' },
+      { n: '51', c: '#a3b1c6', text: 'findings are Unverified; a fresh inventory is the first step to resolving package-level matches.' }
+    ];
+
+    const compare = [
+      { layer: 'Threat intel feeds', ttl: '6h', by: 'Scheduled sync per source', stale: 'TTL expires or a sync fails' },
+      { layer: 'CVE catalog index', ttl: '6h', by: 'Runs after each feed sync', stale: 'TTL expires or feed content changes' },
+      { layer: 'Asset inventory snapshot', ttl: '24h', by: 'Collector running on each server', stale: 'No snapshot within TTL, or no heartbeat for 24h' },
+      { layer: 'Correlation results', ttl: 'Follows its inputs', by: 'New inventory, CVE, or KEV entry', stale: 'Inventory hash, catalog, or KEV version changes' },
+
+    ];
+
+    const jobs = [
+      { id: 'J-1046', layer: 'Threat intel', target: 'CISA KEV delta', started: 'Nov 09 08:00', duration: '00:41', retries: '0 / 3', pct: '40%', ...st('running') },
+      { id: 'J-1045', layer: 'Inventory', target: 'example-asset', started: 'queued', duration: '-', retries: '3 / 3', pct: '0%', ...st('pending') },
+      { id: 'J-1042', layer: 'Threat intel', target: 'NVD · CVE.org · KEV · SentinelOne', started: 'Nov 09 06:00', duration: '04:12', retries: '0 / 3', pct: '100%', ...st('success') },
+      { id: 'J-1041', layer: 'CVE catalog', target: '14,471 records', started: 'Nov 09 06:05', duration: '01:48', retries: '0 / 3', pct: '100%', ...st('success') },
+      { id: 'J-1038', layer: 'Inventory', target: 'example-asset', started: 'Nov 04 12:20', duration: '05:00', retries: '3 / 3', pct: '0%', ...st('failed') },
+      { id: 'J-1037', layer: 'Correlation', target: 'example-asset', started: 'Nov 03 12:25', duration: '02:31', retries: '0 / 3', pct: '100%', ...st('success') }
+    ];
+
+    const D = { c: '#fbbf24', status: 'Detect only' };
+    const G = { c: '#f87171', status: 'Not built' };
+    const P = { c: '#60a5fa', status: 'Proposed' };
+    const triggers = [
+      { name: 'TTL expiry', scope: 'Every layer', ...D },
+      { name: 'New KEV entry', scope: 'Correlation for matching packages', ...G },
+      { name: 'New or updated CVE', scope: 'Catalog index and affected assets', ...G },
+      { name: 'Inventory change (package hash differs)', scope: 'Correlation for that asset', ...G },
+      { name: 'Manual refresh', scope: 'Any layer or asset', ...P }
+    ];
+
+    const gaps = [
+      { p: 'P1', c: '#f87171', title: 'Agent heartbeat and stale alert', note: 'Alert when an asset has not reported for more than 24h; today the only signal is the snapshot-age banner.' },
+      { p: 'P1', c: '#f87171', title: 'Retry and dead-letter queue', note: 'Failed refresh jobs retry with backoff, then land in a queue someone owns.' },
+      { p: 'P1', c: '#f87171', title: 'Event-driven invalidation', note: 'New KEV or CVE marks only the affected correlation results stale, without a full rescan.' },
+      { p: 'P2', c: '#fbbf24', title: 'State history per entry', note: 'Keep a short audit trail of state changes so stale periods can be explained to management.' },
+      { p: 'P2', c: '#fbbf24', title: 'Link to Jobs and Status pages', note: 'One place to see progress and results instead of two.' }
+    ];
+
+    return {
+      layers, states, segs, risks, compare, jobs, triggers, gaps,
+      isExec: tab === 'exec',
+      isTech: tab === 'tech',
+      execCls: tab === 'exec' ? 'tab on' : 'tab',
+      techCls: tab === 'tech' ? 'tab on' : 'tab',
+      setExec: () => this.setState({ tab: 'exec' }),
+      setTech: () => this.setState({ tab: 'tech' })
+    };
+  }
+}
+</script>
+</body>
+</html>

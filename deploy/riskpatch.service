@@ -1,0 +1,14 @@
+[Unit]
+Description=RiskPatch CVE watcher
+After=docker.service
+Requires=docker.service
+
+[Service]
+WorkingDirectory=/opt/riskpatch
+ExecStart=/usr/bin/docker compose up --abort-on-container-exit watcher
+ExecStop=/usr/bin/docker compose stop watcher
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

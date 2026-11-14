@@ -1,0 +1,10 @@
+.env
+.venv
+.git
+cache
+reports
+inventory/stack.yaml
+**/__pycache__
+.pytest_cache
+results
+collector/bin

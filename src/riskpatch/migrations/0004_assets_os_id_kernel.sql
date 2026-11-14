@@ -1,0 +1,2 @@
+-- Columns os_id and kernel already exist in init schema
+-- This migration is skipped as they are defined in 0001_init.sql

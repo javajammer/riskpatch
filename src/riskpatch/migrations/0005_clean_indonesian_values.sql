@@ -1,0 +1,16 @@
+UPDATE findings SET level = 'critical' WHERE level = 'kritis';
+UPDATE findings SET level = 'high' WHERE level = 'tinggi';
+UPDATE findings SET level = 'medium' WHERE level = 'sedang';
+UPDATE findings SET level = 'low' WHERE level = 'rendah';
+UPDATE findings SET level = 'informational' WHERE level = 'informasi';
+UPDATE findings SET action = 'immediate' WHERE action = 'segera';
+UPDATE findings SET action = 'schedule' WHERE action = 'jadwalkan';
+UPDATE findings SET action = 'complete' WHERE action = 'lengkap';
+UPDATE findings SET action = 'document' WHERE action = 'dokumentasi';
+UPDATE jobs SET type = 'analysis' WHERE type = 'analisis';
+UPDATE jobs SET status = 'success' WHERE status = 'sukses';
+UPDATE jobs SET status = 'failed' WHERE status = 'gagal';
+UPDATE jobs SET status = 'queued' WHERE status = 'antrian';
+UPDATE alerts SET message = REPLACE(message, 'CVE baru ', 'New CVE ');
+UPDATE alerts SET message = REPLACE(message, 'rollup naik dari informasional ke kritis', 'rollup raised from informational to critical');
+UPDATE alerts SET message = REPLACE(message, 'rollup naik dari ', 'rollup raised from ');

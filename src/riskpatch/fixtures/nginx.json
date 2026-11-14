@@ -1,0 +1,25 @@
+{
+  "stale": true,
+  "vulns": [
+    {
+      "cve_id": "CVE-2024-7347",
+      "summary": "nginx mp4 module buffer overread. Fixture offline.",
+      "cvss_score": 4.7,
+      "cvss_severity": "MEDIUM",
+      "attack_vector": "LOCAL",
+      "cwe": ["CWE-125"],
+      "kev": false,
+      "references": ["https://nvd.nist.gov/vuln/detail/CVE-2024-7347"],
+      "patched_versions": ["1.26.2"],
+      "ranges": [
+        {
+          "start_including": "1.5.13",
+          "end_excluding": "1.26.2"
+        }
+      ],
+      "affected": true,
+      "source": "fixture",
+      "match_note": "fixture offline"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+---
+# Minimal AWX/Tower job template playbook. RiskPatch does not orchestrate Ansible; AWX does.
+#
+# AWX setup:
+#   - Project: this repo (or copy ansible/ + collector/bin/riskpatch-collector).
+#   - Credential: a custom credential type injecting extra_vars `riskpatch_token` (secret) -
+#     the token must have scope `ingest`. Mark the survey/vars secret so it is never logged.
+#   - Extra vars / inventory vars:
+#       riskpatch_url:           https://riskpatch.example.com   (https required)
+#       riskpatch_arch:          amd64 | arm64                     (per host or group; default amd64)
+#       riskpatch_collector_sha256: <sha256 of the binary for that arch>
+#       riskpatch_exposure / riskpatch_environment / riskpatch_auth_boundary (optional, per host/group)
+#       riskpatch_manifests:     [/var/www/app/composer.lock]      (optional, explicit paths only)
+#   - Build the binaries: scripts/build-collector.sh  (writes collector/bin/linux-amd64 and linux-arm64)
+#   - Limit/forks: use a job slice or forks to bound concurrency against the server.
+- name: Collect facts with the one-shot RiskPatch collector
+  hosts: "{{ target_hosts | default('all') }}"
+  gather_facts: false
+  vars:
+    riskpatch_arch: amd64
+    riskpatch_collector_src: "{{ playbook_dir }}/../collector/bin/linux-{{ riskpatch_arch }}/riskpatch-collector"
+    riskpatch_exposure: unknown
+    riskpatch_environment: unknown
+    riskpatch_auth_boundary: unknown
+    riskpatch_manifests: []
+    riskpatch_mitigations: []
+    riskpatch_ca_file: ""
+  tasks:
+    - name: Fail early on missing inputs
+      ansible.builtin.assert:
+        that:
+          - riskpatch_url is match('^https://')
+          - riskpatch_token is defined
+          - riskpatch_collector_sha256 is defined
+        quiet: true
+      no_log: true
+
+    - name: Verify collector checksum on the controller
+      ansible.builtin.stat:
+        path: "{{ riskpatch_collector_src }}"
+        checksum_algorithm: sha256
+      delegate_to: localhost
+      become: false
+      register: sw_src
+      run_once: true
+
+    - name: Refuse a binary whose checksum does not match
+      ansible.builtin.assert:
+        that: sw_src.stat.exists and sw_src.stat.checksum == riskpatch_collector_sha256
+        quiet: true
+      run_once: true
+
+    - block:
+        - name: Private temp directory (0700)
+          ansible.builtin.tempfile:
+            state: directory
+            prefix: swcollect.
+          register: sw_tmp
+
+        - name: Copy collector (checksum re-verified on target)
+          ansible.builtin.copy:
+            src: "{{ riskpatch_collector_src }}"
+            dest: "{{ sw_tmp.path }}/riskpatch-collector"
+            mode: "0700"
+            checksum: "{{ riskpatch_collector_sha256 }}"
+
+        - name: Run collector once; token goes via stdin, never argv
+          ansible.builtin.command:
+            argv:
+              - "{{ sw_tmp.path }}/riskpatch-collector"
+              - -url
+              - "{{ riskpatch_url }}"
+              - -asset-id
+              - "{{ riskpatch_asset_id | default(inventory_hostname) }}"
+              - -token-stdin
+              - -ca-file
+              - "{{ riskpatch_ca_file }}"
+              - -manifests
+              - "{{ riskpatch_manifests | join(',') }}"
+            stdin: "{{ riskpatch_token }}"
+          environment:
+            RISKPATCH_EXPOSURE: "{{ riskpatch_exposure }}"
+            RISKPATCH_ENVIRONMENT: "{{ riskpatch_environment }}"
+            RISKPATCH_AUTH_BOUNDARY: "{{ riskpatch_auth_boundary }}"
+            RISKPATCH_MITIGATIONS: "{{ riskpatch_mitigations | join(',') }}"
+          async: 300
+          poll: 5
+          no_log: true
+          register: sw_run
+          changed_when: false
+
+        - name: Require server confirmation (accepted snapshot_id)
+          ansible.builtin.assert:
+            that: sw_run.stdout is search('accepted snapshot_id=[0-9]+')
+            quiet: true
+            fail_msg: "RiskPatch did not confirm the upload"
+          no_log: true
+
+        - name: Report snapshot id (no secrets)
+          ansible.builtin.debug:
+            msg: "{{ sw_run.stdout | trim }}"
+      always:
+        - name: Remove binary and temp directory
+          ansible.builtin.file:
+            path: "{{ sw_tmp.path }}"
+            state: absent
+          when: sw_tmp is defined and sw_tmp.path is defined
